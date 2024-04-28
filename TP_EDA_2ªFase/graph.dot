@@ -1,4 +1,6 @@
 digraph G {
+    node [shape=circle, color=blue, style=filled, fillcolor=lightgray];
+    edge [color=red];
     0 [label="7"];
     1 [label="53"];
     2 [label="183"];

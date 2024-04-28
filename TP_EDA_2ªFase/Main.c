@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #pragma region Graph
 typedef struct node
 {
@@ -16,7 +17,6 @@ typedef struct
     Node** vertices;
     int numVertices;
     int size;
-    int directed;
 } Graph;
 #pragma endregion
 
@@ -118,15 +118,26 @@ void removeEdge(Graph* g, int from, int to)
 }
 #pragma endregion
 
-#pragma region GraphFunctions
-Graph* createGraph(int size, int directed)
+#pragma region Graph Functions
+Graph* createGraph(int initialSize)
 {
     Graph* g = malloc(sizeof(Graph));
+    if (!g)
+    {
+        perror("Failed to allocate memory for graph");
+        exit(EXIT_FAILURE);
+    }
 
-    g->vertices = malloc(size * sizeof(Node*));
+    g->vertices = malloc(initialSize * sizeof(Node*));
+    if (!g->vertices)
+    {
+        free(g); // Clean up previously allocated graph memory before exiting
+        perror("Failed to allocate memory for vertices");
+        exit(EXIT_FAILURE);
+    }
+
     g->numVertices = 0;
-    g->size = size;
-    g->directed = directed;
+    g->size = initialSize;
 
     return g;
 }
@@ -207,6 +218,8 @@ void loadMatrixFromFile(Graph* g, const char* filename)
 }
 #pragma endregion
 
+
+//----------------------------------------------------------------------------------------------
 void generateDotFile(Graph* g, const char* filename)
 {
     FILE* file = fopen(filename, "w");
@@ -236,15 +249,83 @@ void generateDotFile(Graph* g, const char* filename)
     fprintf(file, "}\n");
     fclose(file);
 }
+//----------------------------------------------------------------------------------------------
+
+
+//----------------------------------------------------------------------------------------------
+void dfsBacktraking(Graph * g, int v, int visited[], int path[], int* pathIndex, int* maxSum, int currentSum, int bestPath[], int* bestPathLen)
+{
+    visited[v] = 1;
+    path[(*pathIndex)++] = v;
+    currentSum += g->vertices[v]->value;
+
+    // Se é um nó folha e a soma é maior que a máxima encontrada
+    if (currentSum > *maxSum)
+    {
+        *maxSum = currentSum;
+        *bestPathLen = *pathIndex;
+        memcpy(bestPath, path, (*pathIndex) * sizeof(int));
+    }
+
+    // Recursão para todos os vértices adjacentes não visitados
+    for (int i = 0; i < g->vertices[v]->numAdj; i++)
+    {
+        int adj = g->vertices[v]->adjacents[i]->id;
+        if (!visited[adj]) {
+            dfsBacktraking(g, adj, visited, path, pathIndex, maxSum, currentSum, bestPath, bestPathLen);
+        }
+    }
+
+    // Backtrack
+    visited[v] = 0;
+    (*pathIndex)--;
+}
+
+void dfs(Graph* g, int startVertex, int* maxSum, int bestPath[], int* bestPathLen)
+{
+    int* visited = calloc(g->numVertices, sizeof(int));
+    int* path = malloc(g->numVertices * sizeof(int));
+    int pathIndex = 0;
+    *maxSum = 0;
+    *bestPathLen = 0;
+
+    dfsBacktraking(g, startVertex, visited, path, &pathIndex, maxSum, 0, bestPath, bestPathLen);
+
+    free(visited);
+    free(path);
+}
+//----------------------------------------------------------------------------------------------
+
+
 
 #pragma region Main
 int main()
 {
-    Graph* g = createGraph(10, 0);
+    Graph* g = createGraph(10);
+
 
     loadMatrixFromFile(g, "Matrix.txt");
+
+    int maxSum = 0;
+    int* bestPath = malloc(g->numVertices * sizeof(int));
+    int bestPathLen = 0;
+
+    dfs(g, 0, &maxSum, bestPath, &bestPathLen);
+
+    printf("Maior soma dos valores dos vertices: %d\n", maxSum);
+    printf("Caminho com a maior soma: ");
+    for (int i = 0; i < bestPathLen; i++)
+    {
+        printf("%d ", bestPath[i]);
+    }
+    printf("\n");
+
     generateDotFile(g, "graph.dot");
+    system("dot -Tpng graph.dot -o graph.png");
+    //system("start graph.png");
+
     freeGraph(g);
+    free(bestPath);
     return 0;
 }
 #pragma endregion
