@@ -557,7 +557,7 @@ int main()
     int* bestPath = malloc(graph->numVertices * sizeof(int));
 
     loadMatrixFromFile(graph, "Matrix.txt");
-    generateDotFile(graph, "InitialGraph.dot", NULL, 0);
+    generateDotFile(graph, "Graph.dot", NULL, 0);
     system("dot -Tpng Graph.dot -o Graph.png");
     system("start Graph.png");
 
