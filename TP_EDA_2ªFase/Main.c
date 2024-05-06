@@ -684,7 +684,7 @@ int main()
             printf("Path: ");
             for (int i = 0; i < bestPathLen; i++)
             {
-                printf("%d ", bestPath[i]);
+                printf("%d ", bestPath[i] + 1);
             }
             printf("\n");
             break;
@@ -702,9 +702,8 @@ int main()
         }
     } while (choice != 0);
 
-    // Free the memory allocated for the graph and the best path
+    // Free the memory allocated for the graph
     freeGraph(graph);
-    free(bestPath);
     return 0;
 }
 #pragma endregion
