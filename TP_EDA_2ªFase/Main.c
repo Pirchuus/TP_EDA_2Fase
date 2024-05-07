@@ -130,19 +130,23 @@ void removeVertex(Graph* g, int vertexIndex)
 /// <param name="value"></param>
 void addVertexAtStart(Graph* g, int value) 
 {
-    if (g->numVertices == g->size) 
+    // If the number of vertices is equal to the size of the array, reallocate memory
+    if (g->numVertices == g->size)
     {
+        // Double the size of the array
         g->size *= 2;
+        // Reallocate memory for the array of vertices
         Node** temp = realloc(g->vertices, g->size * sizeof(Node*));
-    
-        if (!temp) 
+
+        // Check if memory reallocation was successful
+        if (!temp)
         {
             perror("Failed to reallocate memory for vertices");
             exit(EXIT_FAILURE);
         }
         g->vertices = temp;
     }
-
+	
     // Shift all vertices one position to the right
     for (int i = g->numVertices; i > 0; i--)
     {
@@ -189,7 +193,9 @@ void addVertexAtEnd(Graph* g, int value) {
 /// <param name="newValue"></param>
 void updateVertexValue(Graph* g, int vertexId, int newValue)
 {
-    if (vertexId < 0 || vertexId >= g->numVertices) {
+    // Check if the vertex Index's are valid
+    if (vertexId < 0 || vertexId >= g->numVertices) 
+    {
         printf("Invalid vertex ID.\n");
         return;
     }
@@ -270,7 +276,6 @@ void removeEdge(Graph* g, int from, int to)
             return; // Exit the function after the edge is removed
         }
     }
-
     printf("No edge found from %d to %d.\n", from, to);
 }
 #pragma endregion
@@ -334,7 +339,7 @@ void freeGraph(Graph* g)
 /// <param name="filename"></param>
 void loadMatrixFromFile(Graph* g, const char* filename)
 {
-    // Open the file
+    // Open the file to read
     FILE* file = fopen(filename, "r");
 
     // Check if the file was opened successfully
@@ -408,7 +413,10 @@ void loadMatrixFromFile(Graph* g, const char* filename)
 /// <param name="filename"></param>
 void generateDotFile(Graph* g, const char* filename, int bestPath[], int bestPathLen)
 {
+    // Open the file to write
     FILE* file = fopen(filename, "w");
+
+    // Check if the file was opened successfully
     if (!file)
     {
         perror("Unable to create file");
@@ -423,7 +431,7 @@ void generateDotFile(Graph* g, const char* filename, int bestPath[], int bestPat
         fprintf(file, "    %d [label=\"%d\"];\n", g->vertices[i]->id, g->vertices[i]->value);
     }
 
-    // Output all edges with special color for the best path
+    // Output all edges with a red color for the best path
     for (int i = 0; i < g->numVertices; i++)
     {
         for (int j = 0; j < g->vertices[i]->numAdj; j++)
@@ -539,7 +547,7 @@ void dfs(Graph* g, int startVertex, int* maxSum, int bestPath[], int* bestPathLe
 
     dfsBacktraking(g, startVertex, visited, path, &pathIndex, maxSum, 0, bestPath, bestPathLen);
 
-    // Free the memory allocated for the visited array
+    // Free the memory allocated
     free(visited);
     free(path);
 }
@@ -610,17 +618,17 @@ int main()
                     addVertexAtStart(graph, newValue);
                     printf("\nVertex added successfully.\n\n");
                     printGraph(graph);
-					break;
+		    break;
 
                 case 2:
                     system("cls");
                     printf("Add Vertex at End:\n");
-					printf("Vertex Value: ");
-					scanf("%d", &newValue);
+		    printf("Vertex Value: ");
+		    scanf("%d", &newValue);
                     addVertexAtEnd(graph, newValue);
                     printf("\nVertex added successfully.\n\n");
                     printGraph(graph);
-					break;
+		    break;
 
                 case 0:
                     system("cls");
