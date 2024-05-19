@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #pragma region Graph
 /// <summary>
@@ -130,11 +131,16 @@ void removeVertex(Graph* g, int vertexIndex)
 /// <param name="value"></param>
 void addVertexAtStart(Graph* g, int value) 
 {
+    // Check if the number of vertices is equal to the size of the array
     if (g->numVertices == g->size) 
     {
+        // Double the size of the array
         g->size *= 2;
+
+        // Reallocate memory for the array of vertices
         Node** temp = realloc(g->vertices, g->size * sizeof(Node*));
-    
+        
+        // Check if memory reallocation was successful
         if (!temp) 
         {
             perror("Failed to reallocate memory for vertices");
@@ -189,11 +195,13 @@ void addVertexAtEnd(Graph* g, int value) {
 /// <param name="newValue"></param>
 void updateVertexValue(Graph* g, int vertexId, int newValue)
 {
+    // Check if the vertex ID is valid
     if (vertexId < 0 || vertexId >= g->numVertices) {
         printf("Invalid vertex ID.\n");
         return;
     }
 
+    // Update the value of the vertex
     Node* vertex = g->vertices[vertexId];
     vertex->value = newValue;
 }
@@ -408,13 +416,17 @@ void loadMatrixFromFile(Graph* g, const char* filename)
 /// <param name="filename"></param>
 void generateDotFile(Graph* g, const char* filename, int bestPath[], int bestPathLen)
 {
+    // Open the file
     FILE* file = fopen(filename, "w");
+    
+    // Check if the file was opened successfully
     if (!file)
     {
         perror("Unable to create file");
         exit(EXIT_FAILURE);
     }
 
+    // Write the graph to the file
     fprintf(file, "digraph G {\n");
 
     // Output all vertices
@@ -454,11 +466,14 @@ void generateDotFile(Graph* g, const char* filename, int bestPath[], int bestPat
 /// <param name="g">Pointer to the graph</param>
 void printGraph(Graph* g)
 {
+    // Print each vertex and its adjacent vertices
     for (int i = 0; i < g->numVertices; i++)
     {
+        // Get the vertex
         Node* vertex = g->vertices[i];
         printf("Vertex %d (Value %d): ", vertex->id + 1, vertex->value);
 
+        // Print the adjacent vertices
         if (vertex->numAdj > 0)
         {
             printf("-> ");
@@ -481,7 +496,7 @@ void printGraph(Graph* g)
 
 #pragma region DFS
 /// <summary>
-/// Function to backtrack through the graph
+/// Function to backtrack through the graph using DFS (Depth First Search)
 /// </summary>
 /// <param name="g"></param>
 /// <param name="v"></param>
@@ -494,6 +509,7 @@ void printGraph(Graph* g)
 /// <param name="bestPathLen"></param>
 void dfsBacktraking(Graph* g, int v, int visited[], int path[], int* pathIndex, int* maxSum, int currentSum, int bestPath[], int* bestPathLen)
 {
+    // Mark the current vertex as visited and add it to the path
     visited[v] = 1;
     path[(*pathIndex)++] = v;
     currentSum += g->vertices[v]->value;
@@ -521,7 +537,7 @@ void dfsBacktraking(Graph* g, int v, int visited[], int path[], int* pathIndex, 
 }
 
 /// <summary>
-/// Function to find the highest sum path in a graph
+/// Function to find the highest sum path in a graph using DFS (Depth First Search)
 /// </summary>
 /// <param name="g"></param>
 /// <param name="startVertex"></param>
@@ -537,7 +553,78 @@ void dfs(Graph* g, int startVertex, int* maxSum, int bestPath[], int* bestPathLe
     *maxSum = 0;
     *bestPathLen = 0;
 
+    // Start the DFS from the given vertex
     dfsBacktraking(g, startVertex, visited, path, &pathIndex, maxSum, 0, bestPath, bestPathLen);
+
+    // Free the memory allocated for the visited array
+    free(visited);
+    free(path);
+}
+
+/// <summary>
+/// Function to perform DFS and store all paths from source to destination
+/// </summary>
+/// <param name="g"></param>
+/// <param name="v"></param>
+/// <param name="dest"></param>
+/// <param name="visited"></param>
+/// <param name="path"></param>
+/// <param name="pathIndex"></param>
+void allPathsDFS(Graph* g, int v, int dest, int visited[], int path[], int pathIndex, int currentSum)
+{
+    // Mark the current vertex as visited and add it to the path
+    visited[v] = 1;
+    path[pathIndex++] = g->vertices[v]->value;
+    currentSum += g->vertices[v]->value;
+
+    // If the destination vertex is reached, print the path
+    if (v == dest)
+    {
+        // Print the path
+        for (int i = 0; i < pathIndex; i++)
+        {
+            printf("%d -> ", path[i]);
+        }
+        printf("(Soma: %d)\n", currentSum);
+    }
+    // Otherwise, recursively visit the adjacent vertices
+	else
+	{
+        // Recursively visit the adjacent vertices
+		for (int i = 0; i < g->vertices[v]->numAdj; i++)
+		{
+            // Get the adjacent vertex
+			int adj = g->vertices[v]->adjacents[i]->id;
+			if (!visited[adj])
+			{
+                // Recursively visit the adjacent vertex
+				allPathsDFS(g, adj, dest, visited, path, pathIndex, currentSum);
+			}
+		}
+	}
+    
+    // Mark the current vertex as unvisited
+    visited[v] = 0;
+    pathIndex--;
+    currentSum -= g->vertices[v]->value;
+}
+
+/// <summary>
+/// Function to find and print all paths from a source to a destination using DFS
+/// </summary>
+/// <param name="g"></param>
+/// <param name="startVertex"></param>
+/// <param name="endVertex"></param>
+void allPaths(Graph* g, int startVertex, int endVertex)
+{
+    int* visited = calloc(g->numVertices, sizeof(int));
+    int* path = malloc(g->numVertices * sizeof(int));
+    int pathIndex = 0;
+    int currentSum = 0;
+
+    // Print all paths from the start vertex to the end vertex
+    printf("All paths from %d to %d:\n", startVertex + 1, endVertex + 1);
+    allPathsDFS(g, startVertex, endVertex, visited, path, pathIndex, currentSum);
 
     // Free the memory allocated for the visited array
     free(visited);
@@ -552,7 +639,8 @@ void dfs(Graph* g, int startVertex, int* maxSum, int bestPath[], int* bestPathLe
 /// <returns></returns>
 int main()
 {
-    Graph* graph = createGraph(10);
+    // Create a graph
+    Graph* graph = createGraph(1);
     int choice = 0, choice2 = 0, newValue, index, from, to, maxSum = 0, bestPathLen = 0;
     int* bestPath = malloc(graph->numVertices * sizeof(int));
 
@@ -569,7 +657,8 @@ int main()
         printf("3. Add Edge\n");
         printf("4. Remove Vertex\n");
         printf("5. Remove Edge\n");
-        printf("6. Highest Sum\n");
+        printf("6. All Paths\n");
+        printf("7. Highest Sum\n");
         printf("0. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
@@ -674,6 +763,11 @@ int main()
             break;
 
         case 6:
+            system("cls");
+            allPaths(graph, 0, graph->numVertices - 1);
+            break;
+
+        case 7:
             system("cls");
             printf("Graph:\n");
             printGraph(graph);
