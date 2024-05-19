@@ -76,7 +76,7 @@ void addVertex(Graph* g, int value)
 void removeVertex(Graph* g, int vertexIndex)
 {
     // Check if the vertex Index's are valid
-    if (vertexIndex < 0 || vertexIndex >= g->numVertices) 
+    if (vertexIndex < 0 || vertexIndex >= g->numVertices)
     {
         printf("Invalid vertex index.\n");
         return;
@@ -86,17 +86,17 @@ void removeVertex(Graph* g, int vertexIndex)
     Node* vertexToRemove = g->vertices[vertexIndex];
 
     // First, remove all edges from other vertices pointing to this vertex
-    for (int i = 0; i < g->numVertices; i++) 
+    for (int i = 0; i < g->numVertices; i++)
     {
         if (i == vertexIndex) continue; // Skip the vertex being removed
         Node* vertex = g->vertices[i];
 
         int j = 0;
         while (j < vertex->numAdj) {
-            if (vertex->adjacents[j]->id == vertexToRemove->id) 
+            if (vertex->adjacents[j]->id == vertexToRemove->id)
             {
                 // Shift all elements to the left to overwrite the current position
-                for (int k = j; k < vertex->numAdj - 1; k++) 
+                for (int k = j; k < vertex->numAdj - 1; k++)
                 {
                     vertex->adjacents[k] = vertex->adjacents[k + 1];
                 }
@@ -115,7 +115,7 @@ void removeVertex(Graph* g, int vertexIndex)
     free(vertexToRemove);
 
     // Shift all vertices after the removed vertex one position to the left
-    for (int i = vertexIndex; i < g->numVertices - 1; i++) 
+    for (int i = vertexIndex; i < g->numVertices - 1; i++)
     {
         g->vertices[i] = g->vertices[i + 1];
         g->vertices[i]->id = i; // Update the ID of each vertex to reflect their new position
@@ -129,19 +129,19 @@ void removeVertex(Graph* g, int vertexIndex)
 /// </summary>
 /// <param name="g"></param>
 /// <param name="value"></param>
-void addVertexAtStart(Graph* g, int value) 
+void addVertexAtStart(Graph* g, int value)
 {
     // Check if the number of vertices is equal to the size of the array
-    if (g->numVertices == g->size) 
+    if (g->numVertices == g->size)
     {
         // Double the size of the array
         g->size *= 2;
 
         // Reallocate memory for the array of vertices
         Node** temp = realloc(g->vertices, g->size * sizeof(Node*));
-        
+
         // Check if memory reallocation was successful
-        if (!temp) 
+        if (!temp)
         {
             perror("Failed to reallocate memory for vertices");
             exit(EXIT_FAILURE);
@@ -157,7 +157,7 @@ void addVertexAtStart(Graph* g, int value)
 
     // Create a new node for the first position
     Node* newNode = malloc(sizeof(Node));
-    if (!newNode) 
+    if (!newNode)
     {
         perror("Failed to allocate memory for new node");
         exit(EXIT_FAILURE);
@@ -170,7 +170,7 @@ void addVertexAtStart(Graph* g, int value)
     g->vertices[0] = newNode;
 
     // Update IDs for all vertices
-    for (int i = 1; i <= g->numVertices; i++) 
+    for (int i = 1; i <= g->numVertices; i++)
     {
         g->vertices[i]->id = i;
     }
@@ -248,7 +248,7 @@ void addEdge(Graph* g, int from, int to)
 void removeEdge(Graph* g, int from, int to)
 {
     // Check if the vertex Index's are valid
-    if (from < 0 || from >= g->numVertices || to < 0 || to >= g->numVertices) 
+    if (from < 0 || from >= g->numVertices || to < 0 || to >= g->numVertices)
     {
         printf("Invalid vertex index.\n");
         return;
@@ -256,20 +256,20 @@ void removeEdge(Graph* g, int from, int to)
 
     Node* src = g->vertices[from]; // Get the source vertex
 
-    for (int i = 0; i < src->numAdj; i++) 
+    for (int i = 0; i < src->numAdj; i++)
     {
-        if (src->adjacents[i]->id == to) 
+        if (src->adjacents[i]->id == to)
         {
             // Found the edge, now remove it by shifting left the elements in the adjacency array
-            for (int j = i; j < src->numAdj - 1; j++) 
+            for (int j = i; j < src->numAdj - 1; j++)
             {
                 src->adjacents[j] = src->adjacents[j + 1];
             }
-            
+
             src->numAdj--; // Decrease the count of adjacents
             src->adjacents = realloc(src->adjacents, src->numAdj * sizeof(Node*)); // Optionally resize the memory
-            
-            if (src->adjacents == NULL && src->numAdj > 0) 
+
+            if (src->adjacents == NULL && src->numAdj > 0)
             {
                 perror("Failed to reallocate memory for adjacents");
                 exit(EXIT_FAILURE);
@@ -293,7 +293,7 @@ Graph* createGraph(int initialSize)
 {
     // Allocate memory for the graph
     Graph* g = malloc(sizeof(Graph));
-    
+
     // Check if memory allocation was successful
     if (!g)
     {
@@ -303,7 +303,7 @@ Graph* createGraph(int initialSize)
 
     // Allocate memory for the array of vertices
     g->vertices = malloc(initialSize * sizeof(Node*));
-    
+
     // Check if memory allocation was successful
     if (!g->vertices)
     {
@@ -418,7 +418,7 @@ void generateDotFile(Graph* g, const char* filename, int bestPath[], int bestPat
 {
     // Open the file
     FILE* file = fopen(filename, "w");
-    
+
     // Check if the file was opened successfully
     if (!file)
     {
@@ -588,21 +588,21 @@ void allPathsDFS(Graph* g, int v, int dest, int visited[], int path[], int pathI
         printf("(Soma: %d)\n", currentSum);
     }
     // Otherwise, recursively visit the adjacent vertices
-	else
-	{
+    else
+    {
         // Recursively visit the adjacent vertices
-		for (int i = 0; i < g->vertices[v]->numAdj; i++)
-		{
+        for (int i = 0; i < g->vertices[v]->numAdj; i++)
+        {
             // Get the adjacent vertex
-			int adj = g->vertices[v]->adjacents[i]->id;
-			if (!visited[adj])
-			{
+            int adj = g->vertices[v]->adjacents[i]->id;
+            if (!visited[adj])
+            {
                 // Recursively visit the adjacent vertex
-				allPathsDFS(g, adj, dest, visited, path, pathIndex, currentSum);
-			}
-		}
-	}
-    
+                allPathsDFS(g, adj, dest, visited, path, pathIndex, currentSum);
+            }
+        }
+    }
+
     // Mark the current vertex as unvisited
     visited[v] = 0;
     pathIndex--;
@@ -649,7 +649,7 @@ int main()
     system("dot -Tpng Graph.dot -o Graph.png");
     system("start Graph.png");
 
-    do 
+    do
     {
         printf("\nMenu:\n");
         printf("1. Update Vertex\n");
@@ -699,17 +699,17 @@ int main()
                     addVertexAtStart(graph, newValue);
                     printf("\nVertex added successfully.\n\n");
                     printGraph(graph);
-					break;
+                    break;
 
                 case 2:
                     system("cls");
                     printf("Add Vertex at End:\n");
-					printf("Vertex Value: ");
-					scanf("%d", &newValue);
+                    printf("Vertex Value: ");
+                    scanf("%d", &newValue);
                     addVertexAtEnd(graph, newValue);
                     printf("\nVertex added successfully.\n\n");
                     printGraph(graph);
-					break;
+                    break;
 
                 case 0:
                     system("cls");
